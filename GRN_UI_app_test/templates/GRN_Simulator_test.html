@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gene Regulatory Network </title>
+  <style>
+    #cy {
+      position: absolute;
+      top: 2.5%;
+      left: 1%;
+      width: 63%;
+      height: 89%;
+      display: block;
+      margin-bottom: 10px;
+    }
+    #legend {
+        width: 18%;
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 0.5%;
+        margin-left: 69%;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .legend-line {
+        width: 50px;
+        height: 2px;
+        margin-right: 10px;
+        position: relative;
+        background-color: #000000;
+    }
+    .legend-dashed {
+        border-top: 2px dashed #000000;
+        background-color: transparent;
+    }
+    .legend-solid {
+        background-color: #000000;
+    }
+    .legend-triangle {
+        background-color: #000000;
+        position: relative;
+    }
+    .legend-triangle::after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 10px solid #000000;
+        transform: rotate(90deg);
+    }
+    .legend-tee::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: -5px;
+        width: 10px;
+        height: 2px;
+        background-color: #000000;
+        transform: rotate(90deg);
+    }
+    .scale-bar {
+        width: 15%;
+        height: 20px;
+        background: linear-gradient(to right, white, black);
+        border: 1px solid #000;
+        box-sizing: border-box;
+        margin-top: 3px;
+        margin-right: 5px;
+    }
+    .scale-bar-labels {
+        display: flex;
+        justify-content: space-between;
+        width: 15%;
+        font-size: 12px;
+        color: #000;
+    }
+    #layoutBtn {
+      position: absolute;
+      top: 92%; 
+      left: 57.5%; 
+    }
+    #downloadBtn {
+      position: absolute;
+      top: 96.3%;
+      left: 58%;
+    }
+    .save-return {
+      position: absolute;
+      top: 96.3%;
+      left: 44.7%;
+      background-color: rgba(221, 221, 221, 0.95);
+    }
+    .controls_3 {
+      position: absolute;
+      top: 96.3%;
+      left: 18.5%;
+      background-color: rgba(221, 221, 221, 0.95);
+    }
+    .controls_3 input {
+      width: 105px;
+    }
+    h1 {
+      position: absolute;
+      top: 0%;
+      left: 25%;
+      text-align: center;
+      margin-bottom: 200px;
+      font-size: 20px;
+    }
+    .controls {
+      border: 0px, black;
+      position: absolute;
+      top: 92%;
+      left: 1%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-bottom: 1px;
+      background-color: rgba(221, 221, 221, 0.95);
+    }
+    .controls input {
+      width: 105px;
+    }
+    .controls_2 {
+      position: absolute;
+      top: 96.3%;
+      left: 1%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-bottom: 1px;
+      background-color: rgba(221, 221, 221, 0.95);
+    }
+    .controls_2 input {
+            width: 105px;
+        }
+    label, select, button {
+      margin-bottom: 5px;
+    }
+    button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+      padding-top: 60px;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 600px;
+      height: 500px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #cy2 {
+      position: absolute;
+      top: 1.5%;
+      right: 0%;
+      width: 35%;
+      height: 89%;
+      padding: 10px;
+      border: 0px solid #ddd;
+    }
+    .right_button {
+      display: flex;
+      flex-wrap: wrap;
+      position: absolute;
+      top: 95%;
+      left: 75%;
+      gap: 50px;
+      margin-bottom: 10px;
+      margin-right: 50px;
+    }
+    #fileInputContainer {
+        margin-bottom: 10px;
+
+    }
+    #fileInputLabel {
+        display: inline-block;
+        flex-wrap: wrap;
+        padding: 5px;
+        position: absolute;
+        top: 0.25%;
+        left: 0.25%;
+        background-color: #f0f0f0;
+        color: black;
+        cursor: pointer;
+        border-radius: 2px;
+        border: 1px solid #888888;
+        font-size: 14px;
+        text-align: center;
+    }
+    #fileInputLabel:hover {
+        background-color: #e0e0e0;
+    }
+    #fileInput {
+        display: none;
+    }
+    h2 {
+      position: absolute;
+      top: 0%;
+      left: 78%;
+      text-align: center;
+      margin-bottom: 200px;
+      font-size: 20px;
+    }
+    .container {
+      display: flex;
+      width: 80%;
+      height: 800px;
+      border: 0px solid #ddd;
+      overflow: hidden;
+    }
+    .legend-2 {
+      position: absolute;
+      top: 1.5%;
+      right: 17%;
+      width: 18%;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .legend-item2 {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .legend-node-black {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        border: 2px solid #000;
+        border-radius: 50%;
+    }
+
+    .legend-node-red {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        border: 2px solid #f00;
+        background-color: transparent;
+        border-radius: 50%;
+    }
+    .legend-edge {
+        width: 50px;
+        height: 2px;
+        margin-right: 10px;
+        background-color: #000000;
+    }
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.1/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+  <script src="https://unpkg.com/avsdf-base/avsdf-base.js"></script>
+  <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://unpkg.com/cytoscape-cise/cytoscape-cise.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div id="cy"></div>
+    <div id="legend">
+      <div class="legend-item">
+        <div class="legend-line legend-solid legend-triangle"></div>
+        <span>Independent activation</span>
+      </div>
+      <div class="legend-item">
+          <div class="legend-line legend-dashed">
+              <div class="legend-triangle"></div>
+          </div>
+          <span>Synergistic activation</span>
+      </div>
+        <div class="legend-item">
+            <div class="legend-line legend-solid legend-tee"></div>
+            <span>Independent inhibition</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-line legend-dashed legend-tee"></div>
+            <span>Synergistic inhibition</span>
+        </div>
+        <div class="legend-item">
+          <div class="scale-bar"></div>
+          <span>Constitutive expression</span>
+        </div>
+        <div class="scale-bar-labels">
+          <span>0</span>
+          <span>1</span>
+        </div>
+    </div>
+      <h1>Gene Regulatory Network</h1>
+    </div>
+    <div class="container">
+      <div id="cy2"></div>
+      <div id="legend-cy2" class="legend-2">
+          <div class="legend-item2">
+              <div class="legend-node-black"></div>
+              <span>Attractors of last GRN</span>
+          </div>
+          <div class="legend-item2">
+              <div class="legend-node-red"></div>
+              <span>Attractors of current GRN</span>
+          </div>
+          <div class="legend-item2">
+              <div class="legend-edge"></div>
+              <span>Distances</span>
+          </div>
+      </div>
+      <h2>Fixed-point Attractors</h2>
+  </div>
+  <div id="fileInputContainer">
+      <label for="fileInput" id="fileInputLabel">Load GRN from .json</label>
+      <input type="file" id="fileInput" />
+  </div>
+  <div class="controls">
+    <div>
+      <label for="sourceNode">Regulator:</label>
+      <input type="text" id="sourceNode" placeholder="Enter regulator">
+    </div>
+    <div>
+      <label for="targetNode">Target Gene:</label>
+      <input type="text" id="targetNode" placeholder="Enter target gene">
+    </div>
+    <div>
+      <label for="edgeLabel">Edge Label:</label>
+      <input type="text" id="edgeLabel" placeholder="Enter edge label">
+    </div>
+    <div>
+      <label for="edgeStyle">Edge Style:</label>
+      <select id="edgeStyle">
+        <option value="solid">Independent</option>
+        <option value="dashed">Synergistic</option>
+      </select>
+    </div>
+    <div>
+      <label for="arrowShape">Arrow Shape:</label>
+      <select id="arrowShape">
+        <option value="triangle">Activation</option>
+        <option value="tee">Inhibition</option>
+      </select>
+    </div>
+      <button id="addEdgeBtn">Add/Update Edge</button>
+  </div>
+  <button id="layoutBtn">Re-layout</button>
+  <button id="downloadBtn">Download GRN</button>
+  <div class="save-return">
+    <button id="saveBtn">Save GRN</button>
+    <button id="returnBtn">Return to saved GRN</button>
+  </div>
+
+  <div class="controls_2">
+    <div>
+      <label for="deleteNode">Gene to Delete:</label>
+      <input type="text" id="deleteNode" placeholder="Enter gene">
+      <button id="deleteNodeBtn">Delete Gene</button>
+    </div>
+  </div>
+  <div class="controls_3">
+    <label for="deleteSourceNode">Regulator:</label>
+    <input type="text" id="deleteSourceNode" placeholder="Enter regulator">
+    <label for="deleteTargetNode">Target Gene:</label>
+    <input type="text" id="deleteTargetNode" placeholder="Enter target gene">
+    <button id="deleteEdgeBtn">Delete Edge</button>
+  </div>
+
+  <div class="right_button">
+    <div>
+      <button id="addElementsBtn">Generate/Compare Attractors</button>
+      <button id="downloadAttractorsBtn">Download Attractors</button>
+    <div>
+  <div>
+
+  <!-- Modal -->
+  <div id="nodeModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p id="nodeInfo"></p>
+    </div>
+  </div>
+
+  <!-- Edge Modal for Solid Edges -->
+  <div id="edgeModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <img src="" alt="Edge Image" id="edgeImage" style="max-width:100%; max-height:100%;">
+    </div>
+  </div>
+
+  <!-- Edge Modal for Dashed Edges -->
+  <div id="edgeModalDashed" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <img src="" alt="Dashed Edge Image 1" id="edgeImageDashed1" style="max-width:45%; max-height:100%;">
+      <img src="" alt="Dashed Edge Image 2" id="edgeImageDashed2" style="max-width:45%; max-height:100%;">
+    </div>
+  </div>
+
+  <script>
+    let GRNInitialNodes = [
+            { data: { id: 'a', label: 'Node A', sua7Occupancy: 1, f0: 0 } },
+            { data: { id: 'b', label: 'Node B', sua7Occupancy: 1, f0: 1 } },
+            { data: { id: 'c', label: 'Node C', sua7Occupancy: 1, f0: 0.5 } },
+            { data: { id: 'd', label: 'Node D', sua7Occupancy: 1, f0: 0.2 } },
+            { data: { id: 'e', label: 'Node E', sua7Occupancy: 1, f0:0.8 } }
+          ];
+    let GRNInitialEdges = [
+          { data: { source: 'a', target: 'b', label: ""}, classes: ["solid", "triangle"] },
+          { data: { source: 'a', target: 'c', label: ""}, classes: ["solid", "triangle"] },
+          { data: { source: 'a', target: 'd', label: ""}, classes: ["solid", "tee"] },
+          { data: { source: 'a', target: 'e', label: "0"}, classes: ["dashed", "tee"] },
+          { data: { source: 'b', target: 'e', label: "1"}, classes: ["dashed", "tee"] },
+          { data: { source: 'c', target: 'd', label: ""}, classes: ["solid", "triangle"] },
+          { data: { source: 'c', target: 'e', label: "0"}, classes: ["dashed", "tee"] },
+          { data: { source: 'd', target: 'd', label: ""}, classes: ["solid", "triangle"] },
+          { data: { source: 'd', target: 'e', label: "1"}, classes: ["dashed", "tee"] },
+            ];
+    document.addEventListener('DOMContentLoaded', function(){
+
+      const cy = cytoscape({
+        container: document.getElementById('cy'),
+        elements: {
+          nodes: GRNInitialNodes,
+          edges: GRNInitialEdges
+        },
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'shape': 'ellipse',
+              'border-width': 1,
+              'background-color': 'mapData(f0, 0, 1, white, black)',
+              'label': 'data(label)',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'font-size': '8',
+              'color': function(ele) {
+                        const f0 = ele.data('f0');
+                        return f0 < 0.5 ? 'black' : 'white';
+                      }
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 2,
+              'line-color': 'black',
+              'curve-style': 'bezier',
+              'label': 'data(label)',
+              'target-arrow-color': 'black',
+              'target-arrow-shape': 'triangle',
+              'color': 'red'
+            }
+          },
+          {
+            selector: 'edge.solid',
+            style: {
+              'width': 2,
+              'line-color': 'black',
+              'line-style': 'solid',
+              'target-arrow-color': 'black',
+              'target-arrow-shape': 'triangle',
+              'color': 'red'
+            }
+          },
+          {
+            selector: 'edge.dashed',
+            style: {
+              'width': 2,
+              'line-color': 'black',
+              'line-style': 'dashed',
+              'target-arrow-color': 'black',
+              'target-arrow-shape': 'triangle',
+              'color': 'red'
+            }
+          },
+          {
+            selector: 'edge.tee',
+            style: {
+              'width': 2,
+              'line-color': 'black',
+              'target-arrow-color': 'black',
+              'target-arrow-shape': 'tee',
+              'color': 'red'
+            }
+          }
+        ],
+        userZoomingEnabled: true,
+        wheelSensitivity: 0.1,
+        layout: { name: 'concentric' }
+      });
+
+      //Create clusters for cytoscape
+      var clusters = cy.elements().markovClustering({
+            inflateFactor: 1.5,
+            attributes: [
+                function(edge) {
+                  console.log(edge.data('weight'))
+                    return (edge.data('weight'));
+                }
+            ]
+        });
+      cy.layout({
+          name: 'cise',
+          clusters: clusters.map(cluster => cluster.map(node => node.id())),
+          nodeSeparation: 25
+      }).run();
+
+      // Function to add or update an edge
+      function addOrUpdateEdge(sourceNode, targetNode, edgeLabel, edgeStyle, arrowShape) {
+        // Check if source and target nodes exist
+        if (cy.getElementById(sourceNode).empty()) {
+          alert(`Regulator "${sourceNode}" does not exist.`);
+          return;
+        }
+        if (cy.getElementById(targetNode).empty()) {
+          alert(`Target gene "${targetNode}" does not exist.`);
+          return;
+        }
+
+        const existingEdge = cy.edges().filter(edge =>
+          (edge.data('source') === sourceNode && edge.data('target') === targetNode)
+        );
+
+        if (existingEdge.length > 0) {
+          existingEdge.data('label', edgeLabel);
+          existingEdge.removeClass('solid dashed').addClass(edgeStyle);
+          existingEdge.removeClass('triangle tee').addClass(arrowShape);
+        } else {
+          cy.add({
+            data: {
+              source: sourceNode,
+              target: targetNode,
+              label: edgeLabel
+            },
+            classes: `${edgeStyle} ${arrowShape}`
+          });
+        }
+      }
+
+      // Event listener for Add/Update Edge button
+      document.getElementById('addEdgeBtn').addEventListener('click', function(){
+        let edgeStyle = 'solid';
+        let arrowShape = 'triangle';
+        const sourceNode = document.getElementById('sourceNode').value.trim();
+        const targetNode = document.getElementById('targetNode').value.trim();
+        const edgeLabel = document.getElementById('edgeLabel').value.trim();
+        edgeStyle = document.getElementById('edgeStyle').value;
+        arrowShape = document.getElementById('arrowShape').value;
+
+        if (sourceNode !== '' && targetNode !== '') {
+          addOrUpdateEdge(sourceNode, targetNode, edgeLabel, edgeStyle, arrowShape);
+        } else {
+          alert('Please enter source and target node names.');
+        }
+      });
+
+      // Function to delete a node
+      function deleteNode(nodeId) {
+        cy.remove(cy.getElementById(nodeId));
+      }
+
+      let NodesDeleted = [];
+      // Event listener for Delete Node button
+      document.getElementById('deleteNodeBtn').addEventListener('click', function(){
+        const nodeId = document.getElementById('deleteNode').value.trim();
+        if (nodeId !== '') {
+          NodesDeleted.push(nodeId);
+          deleteNode(nodeId);
+        } else {
+          alert('Please enter a node ID to delete.');
+        }
+      });
+
+      // Function to delete an edge
+      function deleteEdge(sourceNode, targetNode) {
+        const edgesToRemove = cy.edges().filter(edge =>
+          (edge.data('source') === sourceNode && edge.data('target') === targetNode) ||
+          (edge.data('source') === targetNode && edge.data('target') === sourceNode)
+        );
+
+        if (edgesToRemove.length > 0) {
+          cy.remove(edgesToRemove);
+        } else {
+          alert('Edge does not exist between the specified nodes.');
+        }
+      }
+
+      // Event listener for Delete Edge button
+      document.getElementById('deleteEdgeBtn').addEventListener('click', function(){
+        const sourceNode = document.getElementById('deleteSourceNode').value.trim();
+        const targetNode = document.getElementById('deleteTargetNode').value.trim();
+        if (sourceNode !== '' && targetNode !== '') {
+          deleteEdge(sourceNode, targetNode);
+        } else {
+          alert('Please enter source and target node names.');
+        }
+      });
+
+      // Event listener for Layout button
+      document.getElementById('layoutBtn').addEventListener('click', function(){
+        //Create clusters for cytoscape
+        var clusters = cy.elements().markovClustering({
+            inflateFactor: 1.5,
+            attributes: [
+                function(edge) {
+                  console.log(edge.data('weight'))
+                    return (edge.data('weight'));
+                }
+            ]
+        });
+        cy.layout({
+            name: 'cise',
+            clusters: clusters.map(cluster => cluster.map(node => node.id())),
+            nodeSeparation: 25
+        }).run();
+      });
+
+      // Functions to get nodes and edges
+      function getNodes() {
+        return cy.nodes().map(node => {
+          return {
+            id: node.id(),
+            label: node.data('label'),
+            sua7Occupancy: node.data('sua7Occupancy'),
+            f0: node.data('f0')
+          };
+        });
+      }
+
+      function getEdges() {
+        return cy.edges().map(edge => {
+          return {
+            source: edge.source().id(),
+            target: edge.target().id(),
+            label: edge.data('label'),
+            style: [edge.style('target-arrow-shape'), edge.style('line-style')]
+          };
+        });
+      }
+
+      // Function to obtain current time for naming download files
+      function getCurrentDateTimeString() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is zero-indexed
+          const day = String(now.getDate()).padStart(2, '0');
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          return `${year}${month}${day}_`;
+      }
+
+      // Function to download nodes and edges as JSON and SVG file
+      function downloadNodesAndEdges() {
+        // as svg
+        const imgData = cy.png({ output: 'base64' });
+        const link = document.createElement('a');
+        link.href = 'data:image/png;base64,' + imgData;
+        link.download = getCurrentDateTimeString()+'GRN.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // as json
+        const nodes = getNodes();
+        const edges = getEdges();
+        const data = {
+          nodes: nodes,
+          edges: edges
+        };
+        const jsonData = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = getCurrentDateTimeString()+'GRN.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      // Event listener for Download Nodes & Edges button
+      document.getElementById('downloadBtn').addEventListener('click', function(){
+        downloadNodesAndEdges();
+      });
+
+      // Function to show modal with node information
+      function showNodeModal(node) {
+        const modal = document.getElementById('nodeModal');
+        const span = modal.getElementsByClassName('close')[0];
+        const nodeInfo = document.getElementById('nodeInfo');
+
+        nodeInfo.textContent = `${node.data('label')}'s \tSua7 occupancy: ${node.data('sua7Occupancy')}`;
+
+        modal.style.display = 'block';
+
+        span.onclick = function() {
+          modal.style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = 'none';
+          }
+        };
+      }
+
+      // Event listener for node click
+      cy.on('click', 'node', function(event) {
+        const node = event.target;
+        showNodeModal(node);
+      });
+
+      let savedNetworkState;
+      // Save the current network state
+      document.getElementById('saveBtn').addEventListener('click', function() {
+          savedNetworkState = cy.json();
+          console.log('Network state saved.');
+      });
+
+      // Function to return node label's color dynamically
+      function getNodeLabelColor(ele) {
+          const f0 = ele.data('f0');
+          return f0 < 0.5 ? 'black' : 'white';
+      }
+
+      // Return to the saved network state
+      document.getElementById('returnBtn').addEventListener('click', function() {
+          if (savedNetworkState) {
+              cy.json(savedNetworkState);
+              cy.nodes().forEach(node => {
+                node.style('color', getNodeLabelColor(node));
+              });
+              console.log('Returned to saved network state.');
+          } else {
+              console.log('No saved network state to return to.');
+          }
+      });
+
+      // Function to show modal with edge information
+      function showEdgeModal(edge) {
+        const modal = document.getElementById('edgeModal');
+        const span = modal.getElementsByClassName('close')[0];
+
+        modal.style.display = 'block';
+
+        span.onclick = function() {
+          modal.style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = 'none';
+          }
+        };
+      }
+
+      // Function to find the closest node
+      function findClosestNode(distances) {
+        return Object.entries(distances).reduce((closest, [node, distance]) => {
+          return distance < closest.distance ? { node, distance } : closest;
+        }, { node: null, distance: Infinity }).node;
+      }
+
+      // Function to calculate Euclidean distance between two arrays
+      function euclideanDistance(arr1, arr2, PreO, O) {
+          // Make copies of O and PreO to avoid mutation
+          let modifiedO = O.slice(1).split('\t');
+          let modifiedPreO = PreO;
+          if (modifiedPreO !== '') {
+              // Split modifiedPreO by tabs
+              modifiedPreO = modifiedPreO.trimStart();
+              modifiedPreO = modifiedPreO.split('\t');
+          } else {
+              modifiedPreO = [];
+          }
+          console.log('modifiedPreO', modifiedPreO);
+          console.log('modifiedO', modifiedO);
+          // Create a copy of arr1 and arr2 to avoid mutation
+          let copyArr1 = arr1.slice();
+          let copyArr2 = arr2.slice();
+
+          let KO_indexes = modifiedPreO.map((element, index) => modifiedO.indexOf(element) === -1 ? index : -1).filter(index => index !== -1);
+          console.log('before sorting KO_indexes: ', KO_indexes);
+          // Sort the index array in descending order
+          KO_indexes.sort((a, b) => b - a);
+          console.log('KO_indexes: ', KO_indexes);
+          if (copyArr1.length > copyArr2.length) {
+              // Create a new array with elements removed based on KO_indexes
+              copyArr1 = copyArr1.filter((_, index) => !KO_indexes.includes(index));
+          } else if (copyArr1.length < copyArr2.length) {
+              // Create a new array with elements removed based on KO_indexes
+              copyArr2 = copyArr2.filter((_, index) => !KO_indexes.includes(index));
+          }
+          console.log(copyArr1, copyArr2);
+          let sum = 0;
+          for (let i = 0; i < copyArr1.length; i++) {
+              sum += Math.pow(copyArr1[i] - copyArr2[i], 2);
+          }
+          return Math.sqrt(sum);
+      }
+      
+      // Function to calculate distances and construct the dictionary
+      function calculateDistances(list, Batch, PreOrder, Order, length_A) {
+          let nodes = [];
+          let distances = {};
+          for (let i = 0; i < list.length; i++) {
+              if (Batch == 'A') { // Batch is A
+                const labelA = Batch + (i + 1).toString();
+                distances[labelA] = {};
+                nodes.push({ data: { id: labelA, label: labelA }, classes: "Batch_1" });
+                for (let j = 0; j < list.length; j++) {
+                  if (i !== j) {
+                      const labelB = Batch + (j + 1).toString();
+                      distances[labelA][labelB] = euclideanDistance(list[i], list[j], PreOrder, Order);
+                  }
+              }
+              } else { // Batch is B
+                if (i < length_A) {
+                  const labelA = 'A' + (i + 1).toString();
+                  distances[labelA] = {};
+                  nodes.push({ data: { id: labelA, label: labelA }, classes: "Batch_1" });
+                  for (let j = 0; j < list.length; j++) {
+                    if (i !== j) {
+                        if (j < length_A) 
+                        {
+                          const labelB = 'A' + (j + 1).toString();
+                          distances[labelA][labelB] = euclideanDistance(list[i], list[j], PreOrder, Order);
+                        } else {
+                          const labelB = Batch + (j + 1 - length_A).toString();
+                          distances[labelA][labelB] = euclideanDistance(list[i], list[j], PreOrder, Order);
+                        }
+                    }
+                  }
+                } else {
+                  const labelA = Batch + (i + 1 - length_A).toString();
+                  distances[labelA] = {};
+                  nodes.push({ data: { id: labelA, label: labelA }, style: { 'color': 'red', 'width': 20, 'height': 20, 'border-color': 'red', 'z-index': 9999 }, classes: 'Batch_2' });
+                  for (let j = 0; j < list.length; j++) {
+                    if (i !== j) {
+                        if (j < length_A) 
+                        {
+                          const labelB = 'A' + (j + 1).toString();
+                          distances[labelA][labelB] = euclideanDistance(list[i], list[j], PreOrder, Order);
+                        } else {
+                          const labelB = Batch + (j + 1 - length_A).toString();
+                          distances[labelA][labelB] = euclideanDistance(list[i], list[j], PreOrder, Order);
+                        }
+                    }
+                  }
+                }
+              }
+          }
+          return [distances, nodes];
+      }
+
+      // Event listener for edge click to show different modals based on edge style
+      cy.on('tap', 'edge', function(event) {
+        const edge = event.target;
+        if (edge.hasClass('dashed')) {
+          document.getElementById('edgeModalDashed').style.display = 'block';
+          document.getElementById('edgeImageDashed1').src = "{{ url_for('static', filename='images/test.jpg') }}";
+          document.getElementById('edgeImageDashed2').src = "{{ url_for('static', filename='images/test2.jpg') }}";
+        } else {
+          document.getElementById('edgeModal').style.display = 'block';
+          document.getElementById('edgeImage').src = "{{ url_for('static', filename='images/test.jpg') }}";
+        }
+      });
+
+      // Generate distance plot for mRNA steady states
+      let initialNodes = [];
+      let mRNAProfiles = [];
+      let length_of_As = 0;
+      let Distances = {};
+
+      // Event listener for closing modal
+      document.querySelectorAll('.close').forEach(function(el) {
+        el.addEventListener('click', function(){
+          document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.style.display = 'none';
+          });
+        });
+      });
+
+      // Event listener for edge click
+      cy.on('click', 'edge', function(event) {
+        const edge = event.target;
+        showEdgeModal(edge);
+      });
+
+      // Find the maximum value
+      let allValues = Object.values(Distances).flatMap(obj => Object.values(obj));
+      let maxDistance = Math.max(...allValues);
+
+      // Divide all elements by the maximum value
+      for (let key in Distances) {
+        for (let subKey in Distances[key]) {
+          Distances[key][subKey] /= (maxDistance/25);
+        }
+      }
+
+      const cy2 = cytoscape({
+        container: document.getElementById('cy2'),
+        elements: {
+          nodes: initialNodes,
+          edges: []
+        },
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'shape': 'ellipse',
+              'border-width': 1,
+              'background-color': 'white',
+              'label': 'data(label)',
+              'color': 'black',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'font-size': '8'
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 2,
+              'line-color': 'black',
+              'curve-style': 'bezier',
+              'target-arrow-shape': 'none',
+              'source-arrow-shape': 'none',
+              'color': 'red'
+            }
+          }
+        ],
+        userZoomingEnabled: true,
+        wheelSensitivity: 0.1,
+        layout: { name: 'preset' }
+      });
+
+      function updateGraphBasedOnNode(nodeId, distances) {
+        const newEdges = [];
+        let positions = {};
+
+        const batch1Nodes = cy2.elements('node.Batch_1');
+        const batch2Nodes = cy2.elements('node.Batch_2');
+
+        const DistancesBatch_1 = {};
+        batch1Nodes.forEach(node => {
+          if (distances.hasOwnProperty(node.id())) {
+            DistancesBatch_1[node.id()] = distances[node.id()];
+          }
+        });
+
+        const DistancesBatch_2 = {};
+        batch2Nodes.forEach(node => {
+          if (distances.hasOwnProperty(node.id())) {
+            DistancesBatch_2[node.id()] = distances[node.id()];
+          }
+        });
+
+        // Get the cloeset Batch_1 nodes
+        let closestRelationship = {};
+
+        let DistancesBatch_2_and_excluded_1 = JSON.parse(JSON.stringify(DistancesBatch_2));
+        // Loop through DistancesBatch_2 and remove keys that exist in batch1Nodes
+        for (const key in DistancesBatch_2) {
+          for (const nodeName in DistancesBatch_2[key]) {
+            if (batch2Nodes.some(node => node.id() === nodeName)) {
+              delete DistancesBatch_2_and_excluded_1[key][nodeName];
+            }
+          }
+        }
+
+        Object.keys(DistancesBatch_2_and_excluded_1).forEach(nodeId => {
+          let closestNode = findClosestNode(DistancesBatch_2_and_excluded_1[nodeId]);
+          if (!closestRelationship[closestNode]) {
+            closestRelationship[closestNode] = [];
+          }
+          closestRelationship[findClosestNode(DistancesBatch_2_and_excluded_1[nodeId])].push(nodeId)
+        });
+
+        // Position the center node
+        positions[nodeId] = { x: cy2.width() / 2, y: cy2.height() / 2 };
+        const angles = {};
+
+        if (batch1Nodes.some(node => node.id() === nodeId)) {
+          const length_1 = nodeId in closestRelationship ? closestRelationship[nodeId].length : 0;
+          const length_2 = batch1Nodes.map(node => node.id()).length - 1;
+
+          // Calculate positions for other nodes if nodeId is from batch 1
+          let angle = 0;
+          const step = (2 * Math.PI) / (length_1+length_2);
+          
+          for (let target in DistancesBatch_1[nodeId]) {
+            const distance = DistancesBatch_1[nodeId][target] * 10; // Scale distance for visualization
+            if (batch1Nodes.some(node => node.id() === target)) {
+              positions[String(target)] = {
+                x: positions[nodeId].x + distance * Math.cos(angle),
+                y: positions[nodeId].y + distance * Math.sin(angle)
+              };
+              angles[target] = angle;
+              angle += step;
+            } else if (batch2Nodes.some(node => node.id() === target) && (closestRelationship.hasOwnProperty(nodeId) && Object.values(closestRelationship[nodeId]).includes(target))){
+              positions[String(target)] = {
+                x: positions[nodeId].x + distance * Math.cos(angle),
+                y: positions[nodeId].y + distance * Math.sin(angle)
+              };
+              angles[target] = angle;
+              angle += step;
+            }
+
+            if (batch1Nodes.some(node => node.id() === target)){
+              newEdges.push({
+                data: {
+                  source: nodeId,
+                  target: target
+                },
+                style: {
+                  'line-color': 'black',
+                }
+              });
+            } else if (closestRelationship.hasOwnProperty(nodeId) && Object.values(closestRelationship[nodeId]).includes(target)) {
+              newEdges.push({
+                data: {
+                  source: nodeId,
+                  target: target
+                },
+                style: {
+                  'line-color': 'red',
+                }
+              });
+            }
+          }
+        } else if (batch2Nodes.some(node => node.id() === nodeId)) {
+          // Calculate positions for other nodes if nodeId is from batch 2
+          let angle = 0;
+          const step = (2 * Math.PI) / (batch1Nodes.map(node => node.id()).length);
+
+          for (let target in DistancesBatch_2[nodeId]) {
+            if (!batch2Nodes.some(node => node.id() === target)) {
+              const distance = DistancesBatch_2[nodeId][target] * 10; // Scale distance for visualization
+              positions[target] = {
+                x: positions[nodeId].x + distance * Math.cos(angle),
+                y: positions[nodeId].y + distance * Math.sin(angle)
+              };
+              angles[target] = angle;
+              angle += step;
+              newEdges.push({
+                data: {
+                  source: nodeId,
+                  target: target
+                },
+                style: {
+                  'line-color': 'red',
+                }
+              });
+            }
+          }
+        }
+
+        // Put the Batch_2 nodes to the closest Batch_1 nodes
+        for (let closestNode in closestRelationship) {
+          // Get the array of nodes that are closest to this node
+          const denominator = 12+(closestRelationship[closestNode].length-1);
+          let angle = 0;
+          if (Object.values(closestRelationship[closestNode]).includes(nodeId)) {
+            angle = ((2*denominator-2*(closestRelationship[closestNode].length-2)) * Math.PI) / denominator;
+          } else {
+            angle = ((2*denominator-2*(closestRelationship[closestNode].length-1)) * Math.PI) / denominator;
+          }
+
+          const step = (4 * Math.PI) / denominator;
+          for (const target of closestRelationship[closestNode]) {
+            const distance = DistancesBatch_2[target][closestNode] * 10; // Scale distance for visualization
+            const exist = closestRelationship.hasOwnProperty(nodeId) && Object.values(closestRelationship[nodeId]).includes(target);
+            if (target !== nodeId && !exist) {
+              positions[target] = {
+                x: positions[closestNode].x + distance * Math.cos((angle + angles[closestNode])),
+                y: positions[closestNode].y + distance * Math.sin(angle + angles[closestNode])
+              };
+              angle += step;
+            }
+            if (String(nodeId)!==String(target) && !exist) {
+              newEdges.push({
+                data: {
+                  source: closestNode,
+                  target: target
+                },
+                style: {
+                  'line-color': 'red',
+                }
+              });
+            }
+          }
+        }
+
+        cy2.elements('edge').remove();
+        cy2.add(newEdges);
+
+        for (let nodes in positions) {
+          cy2.getElementById(nodes).position(positions[nodes]);
+        }
+
+        cy2.layout({ name: 'preset' }).run();
+      }
+
+      // Initial plot for node 'a'
+      updateGraphBasedOnNode(Object.keys(Distances)[0], Distances);
+
+      // Event listener for node clicks
+      cy2.on('tap', 'node', function(event) {
+        const node = event.target;
+        const nodeId_click = node.id();
+        updateGraphBasedOnNode(nodeId_click, Distances);
+      });
+
+      let globalPyOutput = '';
+      let Order_of_genes = '';
+      let Previous_Order_of_genes = '';
+      document.getElementById('addElementsBtn').addEventListener('click', function() {
+        // Find fixed-point attractors for the current GRN and display
+        // Get .json for the current GRN
+        let JS_nodes = getNodes();
+        let JS_edges = getEdges();
+        let JS_data = {
+          nodes: JS_nodes,
+          edges: JS_edges
+        };
+        let Json_data_str = JSON.stringify(JS_data, null, 2);
+        let newNodes = null;
+        let NewDistances = null;
+        let All_progress = 0;
+        let counter = 0;
+        let percentage_progress = 0;
+        document.getElementById('addElementsBtn').textContent = 'Calculating Attractors... 0%';
+
+        // Use Fetch API to send the input value to the server
+        fetch('/set-input', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ 'input_value': Json_data_str })
+        }).then(response => {
+            if (response.ok) {
+              const eventSource = new EventSource('/stream-data');
+
+              eventSource.onmessage = function(event) {
+                if (event.data.split('\t')[0] == 'All') {
+                  All_progress = 2*parseInt(event.data.split('\t')[1], 10);
+                } else if (event.data.split('|')[0] == 'Final') {
+                  // Assign data.output to the global variable
+                  Order_of_genes = (event.data.split('|')).slice(-(event.data.split('|').length-2))[0];
+                  globalPyOutput = JSON.parse(event.data.split('|')[1]);
+                  //console.log(globalPyOutput);
+                  if (mRNAProfiles.length === 0) {
+                    length_of_As = 0;
+                    mRNAProfiles = globalPyOutput;
+                    [NewDistances, newNodes] = calculateDistances(mRNAProfiles, 'A', Previous_Order_of_genes, Order_of_genes); 
+                  } else {
+                    // remove the A1, A2, .. from the mRNA profiles
+                    if (length_of_As > 0) {
+                      mRNAProfiles.splice(0, length_of_As);
+                    }
+                    length_of_As = mRNAProfiles.length;
+                    mRNAProfiles = mRNAProfiles.concat(globalPyOutput);
+                    [NewDistances, newNodes] = calculateDistances(mRNAProfiles, 'B', Previous_Order_of_genes, Order_of_genes, length_of_As);
+                  }
+                  Previous_Order_of_genes = JSON.parse(JSON.stringify(Order_of_genes));
+
+                  // Add new nodes to cy2
+                  cy2.elements('node').remove();
+                  cy2.add(newNodes);
+                  Distances = NewDistances;
+                  console.log(NewDistances);
+                  // Find the maximum value
+                  let allValues = Object.values(Distances).flatMap(obj => Object.values(obj));
+                  let maxDistance = Math.max(...allValues);
+                  // Divide all elements by the maximum value
+                  for (let key in Distances) {
+                    for (let subKey in Distances[key]) {
+                      Distances[key][subKey] /= (maxDistance/25);
+                    }
+                  }
+                  updateGraphBasedOnNode(Object.keys(Distances)[0], Distances);
+                  document.getElementById('addElementsBtn').textContent = 'Generate/Compare Attractors';
+
+
+                  eventSource.close();
+                } else {
+                  document.getElementById('addElementsBtn').textContent = 'Calculating Attractors... '+((100*counter/All_progress).toFixed(0)).toString()+'%';
+                  counter = counter + 1;
+                }
+                
+              };
+              eventSource.onerror = function(event) {
+                  console.error('SSE error:', event);
+                  eventSource.close();
+              };
+            } else {
+                console.error('Failed to set input value');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+        
+      });
+
+    // Function to rename the rows
+    function renameRows(myList, n) {
+      // Initialize a counter for each type of row
+      let countA = 0;
+      let countB = 0;
+      // Iterate through each row in myList
+      for (let i = 0; i < myList.length; i++) {
+        // Determine the prefix based on the index
+        let prefix = '';
+        if (i < n) {
+          prefix = 'A';
+          countA++;
+        } else {
+          prefix = 'B';
+          countB++;
+        }
+        // Add the numeric suffix (1-indexed)
+        let label = prefix + (prefix === 'A' ? countA : countB);
+        // Assign the label to the row
+        myList[i].label = label;
+      }
+      return myList;
+    }
+
+    // Function to download the attractors as tsv and png
+    function downloadAttractorsAsFile() {
+      // as png
+      const imgData = cy2.png({ output: 'base64' });
+      const link1 = document.createElement('a');
+      link1.href = 'data:image/png;base64,' + imgData;
+      link1.download = getCurrentDateTimeString()+'attractors.png';
+      document.body.appendChild(link1);
+      link1.click();
+      document.body.removeChild(link1);
+      // as tsv
+      const indexed_mRNAProfiles = renameRows(mRNAProfiles, length_of_As);
+      let dataAsText = '\t' + Order_of_genes + '\n';
+      indexed_mRNAProfiles.forEach(item => {
+        dataAsText += `${item.label}\t${item.join('\t')}\n`;
+      });
+      const blob = new Blob([dataAsText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = getCurrentDateTimeString()+'attractors.tsv'; // Specify the filename for download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // Attach click event listener to the download button
+    document.getElementById('downloadAttractorsBtn').addEventListener('click', downloadAttractorsAsFile);
+
+    // Upload a GRN by the upload button
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                try {
+                    const data = JSON.parse(content);
+                    const elements = [];
+
+                    // Convert nodes
+                    data.nodes.forEach(node => {
+                        elements.push({
+                            data: {
+                                id: node.id,
+                                label: node.label,
+                                sua7Occupancy: node.sua7Occupancy,
+                                f0: node.f0
+                            }
+                        });
+                    });
+
+                    // Convert edges
+                    data.edges.forEach(edge => {
+                        elements.push({
+                            data: {
+                                source: edge.source,
+                                target: edge.target,
+                                label: edge.label
+                            },
+                            classes: `${edge.style[0]} ${edge.style[1]}`
+                        });
+                    });
+                    cy.elements().remove(); // Clear existing elements
+                    cy.add(elements); // Add new elements from file
+                    var clusters = cy.elements().markovClustering({
+                      inflateFactor: 1.5,
+                      attributes: [
+                        function(edge) {
+                          return (edge.data('weight'));
+                        }
+                      ]
+                    });
+                    cy.layout({
+                      name: 'cise',
+                      clusters: clusters.map(cluster => cluster.map(node => node.id())),
+                      nodeSeparation: 25
+                    }).run();
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                }
+                document.getElementById('fileInput').value = '';
+            };
+            reader.readAsText(file);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
