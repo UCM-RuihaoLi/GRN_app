@@ -82,15 +82,18 @@
         font-size: 12px;
         color: #000;
     }
-    #layoutBtn {
+    .layoutBtn {
       position: absolute;
-      top: 92%; 
-      left: 57.5%; 
+      top: 96.3%; 
+      left: 58%; 
+      gap: 3px;
+      margin-bottom: 1px;
+      background-color: rgba(221, 221, 221, 0.95);
     }
     #downloadBtn {
       position: absolute;
-      top: 96.3%;
-      left: 58%;
+      top: 92%;
+      left: 57.5%;
     }
     .save-return {
       position: absolute;
@@ -370,7 +373,18 @@
     </div>
       <button id="addEdgeBtn">Add/Update Edge</button>
   </div>
-  <button id="layoutBtn">Re-layout</button>
+
+  <div class="layoutBtn">
+    <label for="layoutMethod">Approach:</label>
+    <select id="layoutMethod">
+      <option value="CiSE">CiSE</option>
+      <option value="Concentric">Concentric</option>
+      <option value="Circle">Circle</option>
+    </select>
+    <button id="layoutBtn">Re-layout</button>
+  </div>
+  
+
   <button id="downloadBtn">Download GRN</button>
   <div class="save-return">
     <button id="saveBtn">Save GRN</button>
@@ -534,6 +548,8 @@
           nodeSeparation: 25
       }).run();
 
+      cy.layout({ name: 'concentric' }).run();
+
       // Function to add or update an edge
       function addOrUpdateEdge(sourceNode, targetNode, edgeLabel, edgeStyle, arrowShape) {
         // Check if source and target nodes exist
@@ -627,22 +643,32 @@
 
       // Event listener for Layout button
       document.getElementById('layoutBtn').addEventListener('click', function(){
+        let layoutMethod = document.getElementById('layoutMethod').value;
+        if (layoutMethod == 'CiSE') {
         //Create clusters for cytoscape
-        var clusters = cy.elements().markovClustering({
-            inflateFactor: 1.5,
-            attributes: [
-                function(edge) {
-                  console.log(edge.data('weight'))
-                    return (edge.data('weight'));
-                }
-            ]
-        });
-        cy.layout({
-            name: 'cise',
-            clusters: clusters.map(cluster => cluster.map(node => node.id())),
-            nodeSeparation: 25
-        }).run();
+          var clusters = cy.elements().markovClustering({
+              inflateFactor: 1.5,
+              attributes: [
+                  function(edge) {
+                    console.log(edge.data('weight'))
+                      return (edge.data('weight'));
+                  }
+              ]
+          });
+          cy.layout({
+              name: 'cise',
+              clusters: clusters.map(cluster => cluster.map(node => node.id())),
+              nodeSeparation: 25
+          }).run();
+        } else if (layoutMethod == 'Concentric') {
+          cy.layout({ name: 'concentric' }).run();
+        } else if (layoutMethod == 'Circle') {
+          cy.layout({ name: 'circle' }).run();
+        } else {
+          alert('Undefined layout approach.');
+        }
       });
+      
 
       // Functions to get nodes and edges
       function getNodes() {
