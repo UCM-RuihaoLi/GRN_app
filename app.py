@@ -17,10 +17,46 @@ from population_functions import *
 from GRN_Expanded_Combinatorial import GRN
 from Combine_Redundant_Attractors import *
 from flask_sslify import SSLify
+import paramiko
+import getpass
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 sslify = SSLify(app)
 input_value = None  # Store the input value globally
+
+# Load environment variables from .env file
+load_dotenv()
+
+def run_computation_on_vm(data):
+    host = "128.84.29.86"
+    port = 22
+    username = "ubuntu"
+    private_key_path = os.getenv("PRIVATE_KEY_PATH")
+    passphrase = os.getenv("PRIVATE_KEY_PASSPHRASE")
+
+    # Prepare data to send
+    data_str = ' '.join(map(str, data))
+
+    # Set up the SSH client
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    # Load private key with passphrase
+    private_key = paramiko.RSAKey(filename=private_key_path, password=passphrase)
+
+    ssh_client.connect(hostname=host, port=port, username=username, pkey=private_key)
+
+    # Activate conda environment and run the computation script
+    command = f"source ~/miniconda3/bin/activate && conda activate base && echo '{data_str}' | python ~/test.py"
+    stdin, stdout, stderr = ssh_client.exec_command(command)
+    result = stdout.read().decode().strip()
+    error = stderr.read().decode().strip()
+    ssh_client.close()
+
+    if error:
+        print(f"Error: {error}")
+    return result
 
 @app.route('/')
 def index():
