@@ -18,7 +18,6 @@ from GRN_Expanded_Combinatorial import GRN
 from Combine_Redundant_Attractors import *
 from flask_sslify import SSLify
 import paramiko
-import getpass
 from dotenv import load_dotenv
 
 app = Flask(__name__)
